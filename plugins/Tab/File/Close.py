@@ -1,18 +1,38 @@
 """
-关闭当前标签页。
+关闭当前标签页插件：允许用户关闭当前打开的文件标签页。
 """
 
 from glueous_plugin import Plugin
 
 
 class ClosePlugin(Plugin):
-    """
-    关闭当前标签页插件：允许用户关闭当前打开的文件标签页。
-    """
 
     # 插件信息
     name = "ClosePlugin"
-    description = "关闭当前标签页，快捷键: Ctrl+W"
+
+    description = """
+# ClosePlugin
+
+- name: ClosePlugin
+- author: Jerry
+- hotkeys: `Ctrl+W`
+- menu entrance: `文件 → 关闭`
+
+## Function
+
+Close the current active tab. When there are no open files, the operation silently fails (without prompts).
+
+## Api
+
+None.
+
+## Depend
+
+Python extension library: None
+
+Other plugins:
+- TabPlugin
+"""
 
     # 快捷键设置
     hotkeys = ["<Control-w>"]

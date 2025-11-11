@@ -69,10 +69,38 @@ class ShowPageInfoPlugin(Plugin):
 
     # 插件唯一标识
     name = "ShowPageInfoPlugin"
-    
+
     # 插件描述
-    description = "显示当前页码信息，快捷键: Ctrl+I"
-    
+    description = """
+# ShowPageInfoPlugin
+
+- name: ShowPageInfoPlugin
+- author: Glueous Reader
+- hotkeys: `Ctrl+I`
+- menu entrance: `工具 → 显示页码信息`
+
+## Function
+
+Display the current page number and total number of pages for the current tab.
+
+If no files are opened, a warning prompt will pop up.
+
+## Api
+
+None
+
+## Depend
+
+Python extension library: None
+
+Other plugins:
+- TabPlugin
+
+## Others
+
+Page number calculation: 'Tab.page_no' is a 0-based index, displayed with+1.
+"""
+
     # 快捷键绑定（格式同 Tkinter）
     hotkeys = ["<Control-i>"]
 
@@ -94,16 +122,16 @@ class ShowPageInfoPlugin(Plugin):
         """
         # 通过 context 获取当前标签页
         current_tab = self.context.get_current_tab()
-        
+
         if current_tab is None:
             # 没有打开的文件
             messagebox.showwarning("提示", "请先打开一个PDF文件")
             return
-        
+
         # 获取页码信息（注意：Tab 类中页码是 0-based 的）
         current_page = current_tab.page_no + 1
         total_pages = current_tab.total_pages
-        
+
         # 显示信息
         messagebox.showinfo(
             "页码信息",
@@ -130,6 +158,37 @@ class ShowPageInfoPlugin(Plugin):
 
 你的插件可以为这个 `ReaderAccess` 对象添加新的属性/方法，这样别的插件就可以访问你定义的变量/函数了。
 
+为了让其他开发者不用阅读源码就能了解这个插件的功能及其提供的额外接口，你需要按照以下格式编写插件的帮助文档，并赋值给该插件类的 `description` 属性：
+
+```markdown
+# PluginName
+
+- name: PluginName
+- author: Your Name
+- hotkeys: None
+- menu entrance: None
+
+## Function
+
+Write a description of the plugin's functionality here.
+
+## Api
+
+The additional properties and methods provided by your plugin for the ReaderAccess object.
+
+## Depend
+
+Python extension library:
+- additional Python extension libraries that your plugin depends on
+
+Other plugins:
+- other plugins that your plugin depends on
+
+## Others
+
+other things you would like other developers to know...
+```
+
 如果你的插件发生了异常，程序不会崩溃，你的插件运行会结束，在标准输出会显示报错信息。
 
 插件开发完成后，请在 [`/plugins/__init__.py`](/plugins/__init__.py) 中更新插件加载顺序。
@@ -150,3 +209,9 @@ class ShowPageInfoPlugin(Plugin):
     ```
 
 3. 运行 [`/main.py`](/main.py) 。
+
+## 注意
+
+> [!WARNING]
+>
+> **项目早期声明**：由于本项目才刚刚建立，还有很多不完善的地方，比如，接口可能会改，无法向后兼容等等。感谢各位的理解！

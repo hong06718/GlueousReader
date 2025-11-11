@@ -78,8 +78,34 @@ class Plugin(ABC):
         """
         插件描述，子类可以重载。
         """
-        return "plugin"
+        return """
+# Plugin
 
+- name: PluginName
+- author: Your Name
+- hotkeys: None
+- menu entrance: None
+
+## Function
+
+Write a description of the plugin's functionality here.
+
+## Api
+
+The additional properties and methods provided by your plugin for the ReaderAccess object.
+
+## Depend
+
+Python extension library:
+- additional Python extension libraries that your plugin depends on
+
+Other plugins:
+- other plugins that your plugin depends on
+
+## Others
+
+other things you would like other developers to know...
+"""
 
     @property
     def hotkey(self) -> str | None:

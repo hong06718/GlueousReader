@@ -14,10 +14,38 @@ class ShowPageInfoPlugin(Plugin):
 
     # 插件唯一标识
     name = "ShowPageInfoPlugin"
-    
+
     # 插件描述
-    description = "显示当前页码信息，快捷键: Ctrl+I"
-    
+    description = """
+# ShowPageInfoPlugin
+
+- name: ShowPageInfoPlugin
+- author: Glueous Reader
+- hotkeys: `Ctrl+I`
+- menu entrance: `工具 → 显示页码信息`
+
+## Function
+
+Display the current page number and total number of pages for the current tab.
+
+If no files are opened, a warning prompt will pop up.
+
+## Api
+
+None
+
+## Depend
+
+Python extension library: None
+
+Other plugins:
+- TabPlugin
+
+## Others
+
+Page number calculation: 'Tab.page_no' is a 0-based index, displayed with+1.
+"""
+
     # 快捷键绑定（格式同 Tkinter）
     hotkeys = ["<Control-i>"]
 
@@ -39,16 +67,16 @@ class ShowPageInfoPlugin(Plugin):
         """
         # 通过 context 获取当前标签页
         current_tab = self.context.get_current_tab()
-        
+
         if current_tab is None:
             # 没有打开的文件
             messagebox.showwarning("提示", "请先打开一个PDF文件")
             return
-        
+
         # 获取页码信息（注意：Tab 类中页码是 0-based 的）
         current_page = current_tab.page_no + 1
         total_pages = current_tab.total_pages
-        
+
         # 显示信息
         messagebox.showinfo(
             "页码信息",
