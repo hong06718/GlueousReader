@@ -25,11 +25,16 @@ Glueous Reader 是一款可高度个性化的电子书阅读器，可以像胶�
 
 ### 编写语言
 
-Python 是最推荐的用于编写插件的语言。如果你不会 Python ，但还是想开发一些高级自定义功能，依然可以使用你熟悉的语言进行开发。例如：
+Python 是最推荐的用于编写插件的语言。如果你不会 Python ，但还是想开发一些高级自定义功能，依然可以使用你熟悉的语言进行开发（不推荐）。例如：
 
-- 用 Python 的标准库 `ctypes` 来运行 C/C++ 函数。
-- 用 Python 的扩展库 `jpype` 来运行 Java 函数。
-- 用 Python 的扩展库 `execjs` 来运行 JavaScript 函数。
+**C/C++**
+
+- 简单函数：用 `ctypes` 加载 `.so`/`.dll`
+- **C++ 类/复杂库**：**强烈推荐** `pybind11`（直接用 `ctypes` 会因 name mangling 和内存管理导致极高成本）
+
+**Java**
+
+- 使用 `JPype` 或 `Py4J`
 
 你可以用你熟悉的语言将主要函数写好，然后用 Python 仅实现 Glueous Reader 的插件接口及对你的函数的调用。
 
@@ -37,13 +42,13 @@ Python 是最推荐的用于编写插件的语言。如果你不会 Python ，�
 
 ### 开发
 
-插件代码文件一律放在 [`/plugins`](/plugins) 文件夹（及其子目录）下，你可以在那里查看已有的插件。
+插件代码文件一律放在 [`/plugins`](/plugins) 文件夹（及其子目录）下，你可以在那里查看学习已有的插件。
 
 插件类需要继承 [`glueous_plugin`](/glueous_plugin) 库中的 [`Plugin`](/glueous_plugin/Plugin.py) 抽象类（你需要先阅读 `Plugin` 类的代码！），需要实现以下方法：
 
-1. `loaded` ：在程序启动时被调用一次。
-2. `run` ：每当插件快捷键被触发时被调用。
-3. `unloaded` ：在程序退出时被调用一次。
+- `loaded` ：在程序启动时被调用一次。
+- `run` ：每当插件快捷键被触发时被调用。
+- `unloaded` ：在程序退出时被调用一次。
 
 例如，见 [`example.py`](/plugins/example.py) ：
 
@@ -116,16 +121,18 @@ class ShowPageInfoPlugin(Plugin):
 
 在实例化你的插件类时，会向构造函数传入一个 [`ReaderAccess`](/glueous_plugin/ReaderAccess.py) 对象，它将作为你的插件访问整个阅读器程序的接口。主要功能如下：
 
-1. 向菜单栏添加选项。
-2. 向工具栏添加组件。
-3. 绑定快捷键。
-4. 数据持久化。
+- 向菜单栏添加选项。
+- 向工具栏添加组件。
+- 绑定快捷键。
+- 数据持久化。
 
 具体 api 可以见 [`/glueous/ReaderAccess.py`](/glueous/ReaderAccess.py) 。
 
 你的插件可以为这个 `ReaderAccess` 对象添加新的属性/方法，这样别的插件就可以访问你定义的变量/函数了。
 
 如果你的插件发生了异常，程序不会崩溃，你的插件运行会结束，在标准输出会显示报错信息。
+
+插件开发完成后，请在 [`/plugins/__init__.py`](/plugins/__init__.py) 中更新插件加载顺序。
 
 ### 注意
 
