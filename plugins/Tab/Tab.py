@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import tkinter as tk
-from tkinter import filedialog, messagebox, ttk, Menu
+from tkinter import messagebox, ttk
 import os
-from typing import Any, Callable, Dict, List, TYPE_CHECKING, override
+from typing import Any, List, override
 from types import MethodType
 
 from PIL import Image, ImageTk
