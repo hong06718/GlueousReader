@@ -102,8 +102,8 @@ class FileState:
         # 客户区左上角的滚动偏移量（单位：逻辑像素，Page 坐标）
         self.scroll_pos = (0.0, 0.0)
 
-        # 当前“活跃页”编号（1-based）
-        self.page_no = 1
+        # 当前“活跃页”编号（0-based）
+        self.page_no = 0
 
         # 缩放比
         self.zoom = 1.0
