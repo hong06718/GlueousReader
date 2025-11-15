@@ -13,4 +13,10 @@ plugin_loading_order: List[str] = [
     "PageDownPlugin",
     "ZoomOutPlugin",
     "ZoomInPlugin",
+    "VerticalScrollPlugin",
+    "HorizontalScrollPlugin",
+    "VerticalScrollUpPlugin",
+    "VerticalScrollDownPlugin",
+    "HorizontalScrollLeftPlugin",
+    "HorizontalScrollRightPlugin",
 ]

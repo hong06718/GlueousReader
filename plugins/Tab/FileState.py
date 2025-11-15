@@ -96,7 +96,7 @@ class FileState:
         self.use_default_state = False
 
         # 页面布局：
-        # - `single page` / `continuous` / `facing` / `book view`
+        # - `single` / `continuous` / `facing` / `book`，其中 ("single", "continuous") 可与 ("", "facing", "book") 两两组合
         self.display_mode = "continuous"
 
         # 客户区左上角的滚动偏移量（单位：逻辑像素，Page 坐标）

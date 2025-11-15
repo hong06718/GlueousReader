@@ -362,7 +362,6 @@ class Tab:
         self.tk_images.clear()
 
         for (page, page_rect, canvas_pos) in self.visible_page_positions:
-            print(page_rect, canvas_pos)
             # 渲染页面图像
             pix = page.get_pixmap(
                 clip = page_rect,
@@ -467,6 +466,19 @@ class Tab:
         except tk.TclError:
             # 若frame已被移除，忽略错误
             pass
+
+
+    def coord2real(self, pos: Tuple[float, float]) -> Tuple[float, float]:
+        """
+        将窗口上的画布上的坐标转换为在整个画布上的坐标。
+        """
+        x_view_start, _ = self.canvas.xview()
+        y_view_start, _ = self.canvas.yview()
+
+        return (
+            self.canvas_width  * x_view_start + pos[0],
+            self.canvas_height * y_view_start + pos[1],
+        )
 
 
 

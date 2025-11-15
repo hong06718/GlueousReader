@@ -1,5 +1,5 @@
 """
-向下滚动。
+向右滚动。
 """
 
 from tkinter import ttk
@@ -8,24 +8,24 @@ from typing import override
 from glueous_plugin import Plugin
 
 
-class VerticalScrollDownPlugin(Plugin):
+class HorizontalScrollRightPlugin(Plugin):
     """
-    向下滚动插件：允许用户通过快捷键或菜单项向下滚动页面。
+    向右滚动插件：允许用户通过快捷键或菜单项向右滚动页面。
     """
 
     # 插件信息
-    name = "VerticalScrollDownPlugin"
+    name = "HorizontalScrollRightPlugin"
     description = """
-# VerticalScrollDownPlugin
+# HorizontalScrollRightPlugin
 
-- name: VerticalScrollDownPlugin
+- name: HorizontalScrollRightPlugin
 - author: Jerry
-- hotkeys: `<Down>`
-- menu entrance: `前往 → 向下滚动`
+- hotkeys: `<Right>`
+- menu entrance: `前往 → 向右滚动`
 
 ## Function
 
-Scroll down the page.
+Scroll right the page.
 
 ## Api
 
@@ -44,7 +44,7 @@ None.
 """
 
     # 快捷键设置
-    hotkeys = ["<Down>"]
+    hotkeys = ["<Right>"]
 
 
     @override
@@ -54,7 +54,7 @@ None.
         """
         self.context.add_menu_command(
             path = ["前往"],
-            label = "向下滚动",
+            label = "向右滚动",
             command = self.run,
             accelerator = self.hotkey
         )
@@ -63,14 +63,14 @@ None.
     @override
     def run(self) -> None:
         """
-        执行向下滚动操作。
+        执行向右滚动操作。
         """
         current_tab = self.context.get_current_tab()
         if current_tab is None:
             return
 
-        # 向下滚动画布
-        current_tab.canvas.yview_scroll(1, "units")
+        # 向右滚动画布
+        current_tab.canvas.xview_scroll(1, "units")
 
 
     @override
