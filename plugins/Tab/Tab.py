@@ -228,7 +228,7 @@ class Tab:
         - List[(能见页面, 该页面上的能见区域, 该区域显示在整块 canvas 上的位置矩形)]
 
         用于 render 方法。
-        
+
         注意：可能会有多个页面。
         """
         x_view_start, x_view_end = self.canvas.xview()
@@ -256,6 +256,19 @@ class Tab:
         注意：可能会有多个页面。
         """
         return [(self.page, fitz.Rect(0, 0, self.page.rect.width, self.page.rect.height) * self.zoom)]
+
+
+    def coord2real(self, pos: Tuple[float, float]) -> Tuple[float, float]:
+        """
+        将窗口上的画布上的坐标转换为在整个画布上的坐标。
+        """
+        x_view_start, _ = self.canvas.xview()
+        y_view_start, _ = self.canvas.yview()
+
+        return (
+            self.canvas_width  * x_view_start + pos[0],
+            self.canvas_height * y_view_start + pos[1],
+        )
 
 
     #### Methods ####
@@ -377,7 +390,7 @@ class Tab:
 
             # 图像转换
             img = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
-            img = self.rotate_image(self.convert_color(img), self.rotation)
+            img = self.convert_color(img)
             self.tk_images.append(ImageTk.PhotoImage(image = img))
 
             # 在画布上绘制
@@ -471,19 +484,6 @@ class Tab:
         except tk.TclError:
             # 若frame已被移除，忽略错误
             pass
-
-
-    def coord2real(self, pos: Tuple[float, float]) -> Tuple[float, float]:
-        """
-        将窗口上的画布上的坐标转换为在整个画布上的坐标。
-        """
-        x_view_start, _ = self.canvas.xview()
-        y_view_start, _ = self.canvas.yview()
-
-        return (
-            self.canvas_width  * x_view_start + pos[0],
-            self.canvas_height * y_view_start + pos[1],
-        )
 
 
 
