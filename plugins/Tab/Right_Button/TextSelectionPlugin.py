@@ -10,7 +10,7 @@ from glueous_plugin import Plugin
 class TextSelectionPlugin(Plugin):
     """
     实现鼠标长按划取文字功能
-    - 长按鼠标左键 500ms 后开始划取
+    - 长按鼠标左键 100ms 后开始划取
     - 释放鼠标时提取选中区域的文字
     """
 
@@ -26,7 +26,7 @@ class TextSelectionPlugin(Plugin):
 ## Function
 
 长按鼠标左键划取 PDF 文字内容。
-- 长按 500ms 后开始划取
+- 长按 100ms 后开始划取
 - 释放鼠标时提取选中区域的文字
 - 文字将显示在弹窗中
 
@@ -61,6 +61,10 @@ Other plugins:
 
         # 为 ReaderAccess 扩展新方法，供 Tab 插件调用
         self.context.setup_text_selection = self._setup_text_selection_for_tab
+
+        # 为Canvas 绑定文字选取事件
+        if hasattr(self.context, 'setup_text_selection'):
+            self.context.setup_text_selection(self)
 
     def run(self) -> None:
         """
@@ -98,7 +102,7 @@ Other plugins:
             def start_selection():
                 selection_state["is_selecting"] = True
 
-            selection_state["timer"] = threading.Timer(0.5, start_selection)
+            selection_state["timer"] = threading.Timer(0.1, start_selection)
             selection_state["timer"].start()
 
         def on_mouse_drag(event):
