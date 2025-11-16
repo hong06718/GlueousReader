@@ -222,10 +222,10 @@ class Tab:
 
 
     @property
-    def visible_page_positions(self) -> List[Tuple[fitz.Page, fitz.Rect, Tuple[float, float]]]:
+    def visible_page_positions(self) -> List[Tuple[fitz.Page, fitz.Rect, fitz.Rect]]:
         """
         返回：
-        - List[(能见页面, 该页面上的能见区域, 该区域显示在整块 canvas 上的左上角坐标)]
+        - List[(能见页面, 该页面上的能见区域, 该区域显示在整块 canvas 上的位置)]
 
         用于 render 方法。
         """
@@ -237,21 +237,21 @@ class Tab:
         page_y1 = y_view_start * self.page.rect.height
         page_x2 = x_view_end   * self.page.rect.width
         page_y2 = y_view_end   * self.page.rect.height
+        visible_page_region = fitz.Rect(page_x1, page_y1, page_x2, page_y2)
 
-        # 该区域显示在整块 canvas 上的左上角坐标
-        canvas_x1 = page_x1 * self.zoom
-        canvas_y1 = page_y1 * self.zoom
+        # 该区域显示在整块 canvas 上的位置
+        visible_canvas_region = visible_page_region * self.zoom
 
-        return [(self.page, fitz.Rect(page_x1, page_y1, page_x2, page_y2), (canvas_x1, canvas_y1))]
+        return [(self.page, visible_page_region, visible_canvas_region)]
 
 
     @property
-    def selectable_page_positions(self) -> List[Tuple[fitz.Page, Tuple[float, float]]]:
+    def selectable_page_positions(self) -> List[Tuple[fitz.Page, fitz.Rect]]:
         """
         返回：
-        - List[(可被选择的页面, 该页面的左上角在整块 canvas 上的左上角坐标)]
+        - List[(可被选择的页面, 该页面的在整块 canvas 上的位置)]
         """
-        return [(self.page, (0.0 * self.zoom, 0.0 * self.zoom))]
+        return [(self.page, fitz.Rect(0, 0, self.page.rect.width, self.page.rect.height) * self.zoom)]
 
 
     #### Methods ####
@@ -363,7 +363,7 @@ class Tab:
         self.canvas.delete("all")
         self.tk_images.clear()
 
-        for (page, page_rect, canvas_pos) in self.visible_page_positions:
+        for (page, page_rect, canvas_rect) in self.visible_page_positions:
             # 渲染页面图像
             pix = page.get_pixmap(
                 clip = page_rect,
@@ -378,8 +378,8 @@ class Tab:
 
             # 在画布上绘制
             self.canvas.create_image(
-                canvas_pos[0],
-                canvas_pos[1],
+                canvas_rect.x0,
+                canvas_rect.y0,
                 anchor = tk.NW,
                 image  = self.tk_images[-1]
             )
