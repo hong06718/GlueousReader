@@ -128,7 +128,7 @@ Other plugins:
                     
                     total_highlights += 1
 
-        # 刷新显示
+        # 【修改】刷新显示：调用 Tab 的 render 方法
         tab.render()
 
     def unloaded(self) -> None:

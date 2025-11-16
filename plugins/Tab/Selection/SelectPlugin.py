@@ -33,7 +33,6 @@ class SelectPlugin(Plugin):
 绑定 Ctrl+鼠标拖动 事件到当前活跃 canvas。
 当发生该事件时，在画布上绘制一个半透明的选择区域（矩形）。
 当接近窗口边缘时，还要滚动。
-选中文字后点击左键会显示文字内容。
 
 ## Api
 
@@ -54,14 +53,6 @@ Other plugins:
     def get_selected_text(access: ReaderAccess, format=None, **kwargs) -> str:
         """
         获取选中区域的文字
-        
-        Args:
-            access: ReaderAccess 对象
-            format: pymupdf.Page.get_text() 支持的格式
-            **kwargs: 其他参数（如 clip）
-        
-        Returns:
-            选中区域的文字
         """
         current_tab = access.get_current_tab()
         if current_tab is None or not hasattr(current_tab, '_selection_rect'):
@@ -71,16 +62,21 @@ Other plugins:
         if not selection_rect:
             return ""
         
-        # 转换画布坐标到 PDF 坐标
-        page_rect = current_tab.page.rect
-        pdf_rect = fitz.Rect(
-            selection_rect[0] / current_tab.zoom,
-            selection_rect[1] / current_tab.zoom,
-            selection_rect[2] / current_tab.zoom,
-            selection_rect[3] / current_tab.zoom,
-        )
+        if format is None:
+            format = "text"
         
-        # 获取文字
+        # 转换画布坐标到 PDF 坐标（考虑滚动）
+        x_view_start, _ = current_tab.canvas.xview()
+        y_view_start, _ = current_tab.canvas.yview()
+        
+        page_rect = current_tab.page.rect
+        pdf_x1 = (selection_rect[0] / current_tab.zoom) + page_rect.width * x_view_start
+        pdf_y1 = (selection_rect[1] / current_tab.zoom) + page_rect.height * y_view_start
+        pdf_x2 = (selection_rect[2] / current_tab.zoom) + page_rect.width * x_view_start
+        pdf_y2 = (selection_rect[3] / current_tab.zoom) + page_rect.height * y_view_start
+        
+        pdf_rect = fitz.Rect(pdf_x1, pdf_y1, pdf_x2, pdf_y2)
+        
         return current_tab.page.get_text(format, clip=pdf_rect, **kwargs)
 
     @staticmethod
@@ -97,7 +93,7 @@ Other plugins:
         # 初始化选择状态
         if not hasattr(current_tab, '_selection_state'):
             current_tab._selection_state = {
-                "start": None,
+                "ctrl_start": None,
                 "rect": None,
                 "canvas_id": None,
             }
@@ -105,16 +101,33 @@ Other plugins:
         
         state = current_tab._selection_state
         
-        def on_ctrl_mouse_down(event):
-            if not (event.state & 0x4):  # 检查 Ctrl 键
-                return
-            state["start"] = (event.x, event.y)
+        def on_button_press(event):
+            """处理普通左键按下 - 清除选框"""
+            if not (event.state & 0x4):  # 不是 Ctrl+左键
+                if state["canvas_id"] is not None:
+                    canvas.delete(state["canvas_id"])
+                    state["canvas_id"] = None
+                    state["rect"] = None
+                    current_tab._selection_rect = None
+                    state["ctrl_start"] = None
         
-        def on_ctrl_mouse_drag(event):
-            if not (event.state & 0x4) or state["start"] is None:
+        def on_ctrl_button_press(event):
+            """Ctrl+左键按下 - 开始选择"""
+            # 清除之前的选框
+            if state["canvas_id"] is not None:
+                canvas.delete(state["canvas_id"])
+                state["canvas_id"] = None
+                state["rect"] = None
+                current_tab._selection_rect = None
+            
+            state["ctrl_start"] = (event.x, event.y)
+        
+        def on_ctrl_button_drag(event):
+            """Ctrl+拖动 - 绘制选框"""
+            if state["ctrl_start"] is None:
                 return
             
-            x1, y1 = state["start"]
+            x1, y1 = state["ctrl_start"]
             x2, y2 = event.x, event.y
             
             # 删除旧选框
@@ -136,29 +149,25 @@ Other plugins:
             # 检查边缘滚动
             _check_edge_scroll(canvas, event.x, event.y, current_tab)
         
-        def on_ctrl_mouse_up(event):
-            state["start"] = None
-        
-        def on_left_click(event):
-            """【新增】左键点击：显示选中文字并清除选框"""
+        def on_ctrl_button_release(event):
+            """Ctrl+释放 - 保存文字"""
+            if state["ctrl_start"] is None:
+                return
+            
+            state["ctrl_start"] = None
+            
+            # 只保存选中文字，不清除选框
             if state["canvas_id"] is not None and state["rect"] is not None:
-                # 获取选中的文字
                 text = SelectPlugin.get_selected_text(access)
                 
                 if text.strip():
-                    messagebox.showinfo("选中文字", f"{text}")
-                
-                # 删除选框
-                canvas.delete(state["canvas_id"])
-                state["canvas_id"] = None
-                state["rect"] = None
-                current_tab._selection_rect = None
+                    current_tab._selected_text = text
         
-        # 绑定事件
-        canvas.bind("<Control-Button-1>", on_ctrl_mouse_down)
-        canvas.bind("<Control-B1-Motion>", on_ctrl_mouse_drag)
-        canvas.bind("<Control-ButtonRelease-1>", on_ctrl_mouse_up)
-        canvas.bind("<Button-1>", on_left_click)  # 【新增】左键点击
+        # 【修改】绑定专用的 Ctrl 组合键事件
+        canvas.bind("<Button-1>", on_button_press)
+        canvas.bind("<Control-Button-1>", on_ctrl_button_press)
+        canvas.bind("<Control-B1-Motion>", on_ctrl_button_drag)
+        canvas.bind("<Control-ButtonRelease-1>", on_ctrl_button_release)
     
     @override
     def loaded(self) -> None:
@@ -194,13 +203,11 @@ def _check_edge_scroll(canvas, x, y, tab):
     height = canvas.winfo_height()
     edge_threshold = 30
     
-    # 检查水平滚动
     if x < edge_threshold and tab.canvas_width > width:
         canvas.xview_scroll(-3, "units")
     elif x > width - edge_threshold and tab.canvas_width > width:
         canvas.xview_scroll(3, "units")
     
-    # 检查垂直滚动
     if y < edge_threshold and tab.canvas_height > height:
         canvas.yview_scroll(-3, "units")
     elif y > height - edge_threshold and tab.canvas_height > height:

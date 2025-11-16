@@ -38,7 +38,6 @@ class DragPlugin(Plugin):
 - 否则，视为拖动页面
 
 当接近窗口边缘时，还要滚动。
-选中文字后点击左键会显示文字内容。
 
 ## Api
 
@@ -68,14 +67,21 @@ Other plugins:
         if not selection_rect:
             return ""
         
-        # 转换画布坐标到 PDF 坐标
+        # 【修改】设置默认格式为 "text"
+        if format is None:
+            format = "text"
+        
+        # 转换画布坐标到 PDF 坐标（考虑滚动）
+        x_view_start, _ = current_tab.canvas.xview()
+        y_view_start, _ = current_tab.canvas.yview()
+        
         page_rect = current_tab.page.rect
-        pdf_rect = fitz.Rect(
-            selection_rect[0] / current_tab.zoom,
-            selection_rect[1] / current_tab.zoom,
-            selection_rect[2] / current_tab.zoom,
-            selection_rect[3] / current_tab.zoom,
-        )
+        pdf_x1 = (selection_rect[0] / current_tab.zoom) + page_rect.width * x_view_start
+        pdf_y1 = (selection_rect[1] / current_tab.zoom) + page_rect.height * y_view_start
+        pdf_x2 = (selection_rect[2] / current_tab.zoom) + page_rect.width * x_view_start
+        pdf_y2 = (selection_rect[3] / current_tab.zoom) + page_rect.height * y_view_start
+        
+        pdf_rect = fitz.Rect(pdf_x1, pdf_y1, pdf_x2, pdf_y2)
         
         # 获取文字
         return current_tab.page.get_text(format, clip=pdf_rect, **kwargs)
@@ -85,14 +91,19 @@ Other plugins:
         """
         判断画布坐标 (canvas_x, canvas_y) 是否落在文字上
         """
-        # 获取文字块信息
         try:
             text_dict = tab.page.get_text("dict")
             blocks = text_dict.get("blocks", [])
             
-            # 转换画布坐标到 PDF 坐标
-            pdf_x = canvas_x / tab.zoom
-            pdf_y = canvas_y / tab.zoom
+            # 获取滚动偏移
+            x_view_start, _ = tab.canvas.xview()
+            y_view_start, _ = tab.canvas.yview()
+            
+            page_rect = tab.page.rect
+            
+            # 转换画布坐标到 PDF 坐标（考虑滚动）
+            pdf_x = (canvas_x / tab.zoom) + page_rect.width * x_view_start
+            pdf_y = (canvas_y / tab.zoom) + page_rect.height * y_view_start
             
             for block in blocks:
                 if block.get("type") == 0:  # 文本块
@@ -130,11 +141,26 @@ Other plugins:
         state = current_tab._drag_state
         
         def on_mouse_down(event):
+            # 【修改】检查是否有 Ctrl 键，有则忽略（由 SelectPlugin 处理）
+            if event.state & 0x4:
+                return
+            
+            # 【新增】左键按下时清除之前的划词选框
+            if state["is_text_selection"] and state["canvas_id"] is not None:
+                canvas.delete(state["canvas_id"])
+                state["canvas_id"] = None
+                state["selection_rect"] = None
+                current_tab._drag_selection_rect = None
+            
             state["start"] = (event.x, event.y)
             # 判断是否在文字上
             state["is_text_selection"] = DragPlugin._is_on_text(current_tab, event.x, event.y)
         
         def on_mouse_drag(event):
+            # 【修改】检查是否有 Ctrl 键，有则忽略
+            if event.state & 0x4:
+                return
+            
             if state["start"] is None:
                 return
             
@@ -170,28 +196,28 @@ Other plugins:
                     canvas.yview_scroll(dy // 10, "units")
         
         def on_mouse_up(event):
+            # 【修改】检查是否有 Ctrl 键，有则忽略
+            if event.state & 0x4:
+                return
+            
+            if state["start"] is None:
+                return
+            
             state["start"] = None
-        
-        def on_left_click(event):
-            """【新增】左键点击：显示选中文字（划词模式）并清除选框"""
+            
+            # 【修改】如果是划词模式，只保存文字，不清除选框
             if state["is_text_selection"] and state["canvas_id"] is not None and state["selection_rect"] is not None:
                 # 获取选中的文字
                 text = DragPlugin.get_selected_text(access)
                 
                 if text.strip():
-                    messagebox.showinfo("选中文字", f"{text}")
-                
-                # 删除选框
-                canvas.delete(state["canvas_id"])
-                state["canvas_id"] = None
-                state["selection_rect"] = None
-                current_tab._drag_selection_rect = None
+                    # 保存选中文字供其他插件使用
+                    current_tab._selected_text = text
         
         # 绑定事件
         canvas.bind("<Button-1>", on_mouse_down)
         canvas.bind("<B1-Motion>", on_mouse_drag)
         canvas.bind("<ButtonRelease-1>", on_mouse_up)
-        canvas.bind("<Button-1>", on_left_click)  # 【新增】左键点击
     
     @override
     def loaded(self) -> None:
