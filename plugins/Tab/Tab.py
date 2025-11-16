@@ -225,9 +225,11 @@ class Tab:
     def visible_page_positions(self) -> List[Tuple[fitz.Page, fitz.Rect, fitz.Rect]]:
         """
         返回：
-        - List[(能见页面, 该页面上的能见区域, 该区域显示在整块 canvas 上的位置)]
+        - List[(能见页面, 该页面上的能见区域, 该区域显示在整块 canvas 上的位置矩形)]
 
         用于 render 方法。
+        
+        注意：可能会有多个页面。
         """
         x_view_start, x_view_end = self.canvas.xview()
         y_view_start, y_view_end = self.canvas.yview()
@@ -249,7 +251,9 @@ class Tab:
     def selectable_page_positions(self) -> List[Tuple[fitz.Page, fitz.Rect]]:
         """
         返回：
-        - List[(可被选择的页面, 该页面的在整块 canvas 上的位置)]
+        - List[(可被选择的页面, 该页面的在整块 canvas 上的位置矩形)]
+
+        注意：可能会有多个页面。
         """
         return [(self.page, fitz.Rect(0, 0, self.page.rect.width, self.page.rect.height) * self.zoom)]
 
