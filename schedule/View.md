@@ -56,6 +56,9 @@
 
 - `pymupdf.Page` ：页面类，下面简记为 `Page` ，具体细节自行搜索。
 - `Page.rect` ：页面矩形。
+- `Tab.doc` ：一个 `pymupdf.Document` 对象，可视为 `Sequence[Page]` 和 `Iterable[Page]` 。
+- `Tab.zoom` ：缩放比例（“1”表示未缩放）。
+- `Tab.display_mode` ：视图模式。
 
 ## Future
 
