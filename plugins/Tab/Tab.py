@@ -37,7 +37,7 @@ class Tab:
         self.notebook.add(self.frame)          # 将frame添加到Notebook
 
         # 从应用数据中搜索这本书的数据
-        file_states = self.context.get_data().setdefault("file_states", [])
+        file_states = self.context.data.setdefault("file_states", [])
         for file_state in file_states:
             # 查找路径相同的
             if file_state["file_path"] == file_path:

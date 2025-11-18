@@ -151,7 +151,8 @@ class ReaderAccess:
         return self._reader.notebook
 
 
-    def get_data(self) -> Dict[str, Any]:
+    @property
+    def data(self) -> Dict[str, Any]:
         """
         返回对应用数据的引用，插件可以写入该对象以实现数据持久化。
         """
