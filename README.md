@@ -1,5 +1,40 @@
 # Glueous Reader
 
+## 项目层次图
+
+```mermaid
+graph
+	classDef Plugin stroke:#6090b8,stroke-width:4px;
+	
+	subgraph "glueous: <code>module</code>"
+		reader[reader: <code>Reader</code>]
+		access[access: <code>ReaderAccess</code>]
+		plugin_manager[plugin_manager: <code>PluginManager</code>]
+	end
+	
+	subgraph "glueous_plugin: <code>module</code>"
+		Plugin(<code>Plugin</code>)
+	end
+	
+	subgraph plugins
+		plugin1(plugin1: <code>Plugin1</code>)
+		plugin2(plugin2: <code>Plugin2</code>)
+	end
+	class plugins Plugin
+	
+	plugin1 -.->|inherit| Plugin
+	plugin2 -.->|inherit| Plugin
+	
+	reader -->|comb| plugin_manager
+	plugin_manager -->|control| plugin1
+	plugin_manager -->|control| plugin2
+	
+	reader <-->|comb| access
+
+	access <-->|self.context| plugin1
+	access <-->|self.context| plugin2
+```
+
 ## 简介
 
 Glueous Reader 是一款可高度个性化的电子书阅读器，可以像胶水（glue）一样将各种插件粘合在一起。
