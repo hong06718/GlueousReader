@@ -450,8 +450,6 @@ class Tab:
         self.h_scroll.config(command = self.canvas.xview)
 
 
-
-
     def open(self) -> bool:
         """
         打开文件并初始化。
