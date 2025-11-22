@@ -413,7 +413,7 @@ The `api_key` field is saved in the environment variable.
             }
         """
         # 从数据中获取配置，如果没有则返回默认配置
-        configuration = self.context.data.get(self._DATA_CONFIG_KEY, self.DEFAULT_CONFIGURATION)
+        configuration = self.context.data.get(self._DATA_CONFIG_KEY, self.DEFAULT_CONFIGURATION).copy()
 
         # 从环境变量中读入 api_key，并加入 configuration 中
         api_key_from_env = os.environ.get(self._ENVIRONMENT_API_KEY_KEY, "")

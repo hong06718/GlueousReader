@@ -31,6 +31,7 @@ def check_markmap() -> bool:
     """
     检查 Markmap 是否已正确安装。
     """
+    print("Markmap version: ", end = "")
     try:
         subprocess.run(['markmap.cmd', '--version'])
     except FileNotFoundError:
@@ -236,9 +237,11 @@ For large documents, the text will be compressed using AI to fit within token li
         return f"""
 请为以下文档内容生成一个思维导图。要求：
 1. 使用 Markdown 格式
-2. 最多 {depth} 层结构
-3. 突出文档的核心要点和逻辑关系
-4. 保持简洁明了
+2. 仅输出 Markdown 内容，不要有附加的内容
+3. 最多 {depth} 层结构
+4. 使用原文的语言
+5. 突出文档的核心要点和逻辑关系
+6. 保持简洁明了
 
 文档内容：
 
@@ -304,7 +307,7 @@ For large documents, the text will be compressed using AI to fit within token li
             # 调用AI API
             label.config(text = "正在生成思维导图的结构...")
             prompt = self._build_mind_map_prompt(doc_text, params["depth"])
-            mindmap_text = self._generate_mindmap_text(ai_config, prompt)
+            mindmap_text = self._generate_mindmap_text(ai_config, prompt).strip()
 
             # 去掉开头的 ```markdown 和结尾的 ```
             if mindmap_text.startswith("`"):
