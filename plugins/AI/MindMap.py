@@ -19,6 +19,27 @@ from glueous_plugin import Plugin
 
 
 
+MIND_MAP_HELP_WEBSITE = "https://github.com/Jerry-Wu-GitHub/GlueousReader/blob/main/docs/MindMap.md"
+
+
+def show_help_in_browser(event = None) -> None:
+    """打开帮助网页"""
+    webbrowser.open(MIND_MAP_HELP_WEBSITE)
+
+
+def check_markmap() -> bool:
+    """
+    检查 Markmap 是否已正确安装。
+    """
+    try:
+        subprocess.run(['markmap.cmd', '--version'])
+    except FileNotFoundError:
+        messagebox.showerror("错误", "没有找到 Markmap，可能是因为您没有正确安装 Markmap。")
+        show_help_in_browser()
+        return False
+    return True
+
+
 def extract_document_text(tab, page_range: Tuple[int, int | float]) -> List[str]:
     """
     提取指定页面范围的文档文本。
@@ -310,6 +331,10 @@ For large documents, the text will be compressed using AI to fit within token li
         """
         插件主逻辑：调用AI生成思维导图
         """
+        # 检查 Markmap 有没有安装
+        if not check_markmap():
+            return
+
         # 获取当前标签页
         current_tab = self.context.get_current_tab()
         if current_tab is None:
@@ -450,7 +475,7 @@ class MindMapDialog():
         self.help_link.config(state = "normal")  # 确保标签可交互
 
         # 绑定点击事件（左键点击触发 self.help 函数）
-        self.help_link.bind("<Button-1>", self.show_help_in_browser)
+        self.help_link.bind("<Button-1>", show_help_in_browser)
         self.help_link.pack(fill=tk.X, pady=(20, 0))
 
 
@@ -486,11 +511,6 @@ class MindMapDialog():
         """取消按钮点击事件"""
         self.result = None
         self.dialog.destroy()
-
-
-    def show_help_in_browser(self, event = None) -> None:
-        """点击帮助链接时打开帮助网页"""
-        webbrowser.open(self.HELP_WEBSITE)
 
 
     def get_parameters(self):
@@ -692,7 +712,7 @@ class MindmapTextResult():
         try:
             subprocess.run(['markmap.cmd', md_file, '-o', output_file_path])
             messagebox.showinfo("成功", f"文件已成功保存到:\n{output_file_path}")
-        except Exception as e:
-            messagebox.showerror("错误", f"保存文件失败: {e}")
+        except Exception as error:
+            messagebox.showerror("错误", f"保存文件失败: {error}")
 
         os.remove(md_file)

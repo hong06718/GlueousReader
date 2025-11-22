@@ -13,6 +13,8 @@
 AI插件将会以下面这样的代码调用您的配置：
 
 ```python
+from openai import OpenAI
+
 client = OpenAI(
     base_url = ai_config["url"],
     api_key  = ai_config["api_key"],
