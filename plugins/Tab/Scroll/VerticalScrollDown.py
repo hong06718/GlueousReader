@@ -69,6 +69,12 @@ None.
         if current_tab is None:
             return
 
+        # 检查是否到达边界
+        arrive_boundary = False
+
+        if current_tab.display_mode == "single":
+            pass
+
         # 向下滚动画布
         current_tab.canvas.yview_scroll(1, "units")
 

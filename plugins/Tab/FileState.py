@@ -4,6 +4,7 @@ FileState 类。
 
 from __future__ import annotations
 
+from enum import Enum
 from typing import Any, Dict, List
 
 
@@ -63,13 +64,29 @@ class Favorite:
         }
 
 
+class DisplayMode(Enum):
+    SINGLE            = "single"
+    CONTINUOUS        = "continuous"
+    SINGLE_FACING     = "single facing"
+    CONTINUOUS_FACING = "continuous facing"
+    SINGLE_BOOK       = "single book"
+    CONTINUOUS_BOOK   = "continuous book"
+
+
 
 class FileState:
     """
     FileState 类，记录 Tab 类的状态，可以序列化为 JSON 对象来存储，用于在下次重新打开程序时能恢复到上次打开时的状态。
     """
 
-    DISPLAY_MODES = ("single", "continuous", "facing", "book")
+    DISPLAY_MODES = (
+        DisplayMode.SINGLE,
+        DisplayMode.CONTINUOUS,
+        DisplayMode.SINGLE_FACING,
+        DisplayMode.CONTINUOUS_FACING,
+        DisplayMode.SINGLE_BOOK,
+        DisplayMode.CONTINUOUS_BOOK,
+    )
 
     ROTATIONS = (0, 90, 180, 270)
 
@@ -97,7 +114,7 @@ class FileState:
 
         # 页面布局：
         # - `single` / `continuous` / `facing` / `book`，其中 ("single", "continuous") 可与 ("", "facing", "book") 两两组合
-        self.display_mode = "continuous"
+        self.display_mode: DisplayMode = DisplayMode.SINGLE
 
         # 客户区左上角的滚动偏移量（单位：逻辑像素，Page 坐标）
         self.scroll_pos = (0.0, 0.0)
@@ -183,7 +200,7 @@ class FileState:
         instance.is_missing         = json_obj.get("is_missing", False)
         instance.open_count         = json_obj.get("open_count", 0)
         instance.use_default_state  = json_obj.get("use_default_state", False)
-        instance.display_mode       = json_obj.get("display_mode", "continuous")
+        instance.display_mode       = DisplayMode(json_obj.get("display_mode", "single"))
         instance.page_no            = json_obj.get("page_no", 1)
         instance.zoom               = json_obj.get("zoom", 1.0)
         instance.rotation           = json_obj.get("rotation", 0)
@@ -248,7 +265,7 @@ class FileState:
             "is_missing"        : self.is_missing,
             "open_count"        : self.open_count,
             "use_default_state" : self.use_default_state,
-            "display_mode"      : self.display_mode,
+            "display_mode"      : self.display_mode.value,
             "scroll_pos"        : list(self.scroll_pos),
             "page_no"           : self.page_no,
             "zoom"              : self.zoom,

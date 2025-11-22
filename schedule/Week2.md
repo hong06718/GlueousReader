@@ -113,6 +113,6 @@ graph LR
 
 **AI**：
 
-- [ ] [AIConfigure.md](AIConfigure.md) 
+- [x] [AIConfigure.md](AIConfigure.md) 
 - [ ] [Summary.md](Summary.md) 
 - [ ] [MindMap.md](MindMap.md) 
