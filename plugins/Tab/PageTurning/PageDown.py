@@ -112,21 +112,45 @@ Page number calculation: 'Tab.page_no' is a 0-based index.
 
 
     @override
-    def run(self) -> None:
+    def run(self) -> bool:
         """
         执行下一页操作。
+
+        若成功翻页，则返回 True，否则返回 False 。
         """
         current_tab = self.context.get_current_tab()
         if current_tab is None:
             return
 
-        # 切换到下一页
-        if current_tab.page_no < current_tab.total_pages - 1:
-            current_tab.page_no += 1
-            self.context.update_page_number()
-            self.context.update_page_turning_button()
-        else:
+        # 单页视图
+        if current_tab.display_mode == "single":
+            self.page_down_single(current_tab)
+
+
+    def page_down_single(self, tab) -> bool:
+        """
+        对单页视图的文档进行向下翻页。
+
+        返回是否成功翻页。
+        """
+        if tab.page_no >= tab.total_pages - 1:
             print("已经是最后一页")
+            return False
+
+        tab.scroll_pos = (tab.scroll_pos[0], 0)
+        tab.page_no += 1
+        self.context.update_page_number()
+        self.context.update_page_turning_button()
+        return True
+
+
+    def page_down_continuous(self, tab) -> bool:
+        """
+        对单页视图的文档进行向下翻页。
+
+        返回是否成功翻页。
+        """
+        pass
 
 
     @override

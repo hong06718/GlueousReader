@@ -16,7 +16,7 @@ graph LR
 	end
 	
 	subgraph AI
-		ai[AI: 配置参数]
+		AIConfigure[AIConfigure: 配置参数]
 		Summary[Summary: 显示总结]
 		MindMap[MindMap: 显示导图]
 	end
@@ -84,9 +84,9 @@ graph LR
 	OpticalCharacterRecognition -->|overload| get_text
 	OpticalCharacterRecognition -->|write| data
 	
-	data -->|get| ai
-	ai -->|set| get_AI_configuration
-	ai -->|write| data
+	data -->|get| AIConfigure
+	AIConfigure -->|set| get_AI_configuration
+	AIConfigure -->|write| data
 
 	get_selected_text --> Summary
 	doc --> Summary
@@ -104,15 +104,15 @@ graph LR
 
 **视图界面**：
 
--  [View.md](View.md) 
--  [Select&Drag.md](Select&Drag.md) 
+- [ ] [View.md](View.md) 
+- [ ] [Select&Drag.md](Select&Drag.md) 
 
 **OCR**：
 
--  [OCR.md](OCR.md) 
+- [ ] [OCR.md](OCR.md) 
 
 **AI**：
 
-- [AI.md](AI.md) 
-- [Summary.md](Summary.md) 
-- [MindMap.md](MindMap.md) 
+- [x] [AIConfigure.md](AIConfigure.md) 
+- [ ] [Summary.md](Summary.md) 
+- [ ] [MindMap.md](MindMap.md) 
